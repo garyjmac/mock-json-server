@@ -1,5 +1,5 @@
 export default interface Poems {
-  id: number
+  id: string
   uuid: string
   Title: string
   Text: string

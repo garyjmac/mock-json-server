@@ -12,9 +12,33 @@ const port = 3004
 // Set default middlewares (logger, static, cors and no-cache)
 server.use(middlewares)
 
-// Add custom routes before JSON Server router
-server.get('/customroute', (req, res) => {
-  res.jsonp({ data: 'Custom Data' })
+// Mock2 Poems - Find file name in POSTed FormData
+server.post('/poems', (req, res) => {
+  let uploadFileName = ''
+
+  const form = new multiparty.Form()
+  form.parse(req, function (err, fields, files) {
+    console.log(`Files: ${JSON.stringify(files)}`)
+    uploadFileName = files.file[0].originalFilename
+
+    console.log('Pre File Switch')
+    console.log(`uploadFile: ${uploadFileName}`)
+    // Mock2 Poems POST
+    switch (uploadFileName) {
+      case 'poemfile1.txt':
+        console.log('File Hit')
+        res.jsonp({ uuid: '11' })
+        break
+      case 'poemfile2.txt':
+        console.log('File Hit')
+        res.jsonp({ uuid: '22' })
+        break
+      default:
+        console.log('Default - No File Hit')
+        res.jsonp({ uuid: '99' })
+        break
+    }
+  })
 })
 
 // Mock1 Acronyms - Get the '/acyonyms?acro=????' acro query param for use in filtering of acronyms
@@ -48,20 +72,20 @@ server.use(jsonServer.bodyParser)
 server.use(router)
 
 // Mock2 Poems - Find file name in POSTed FormData
-let uploadFileName = ''
-server.use((req, res, next) => {
-  const url = req.originalUrl
-  if (url.startsWith('/poems') && req.method === 'POST') {
-    const form = new multiparty.Form()
-    form.parse(req, function (err, fields, files) {
-      console.log(`Files: ${JSON.stringify(files)}`)
-      uploadFileName = files.file[0].originalFilename
-      console.log(`File Name: ${uploadFileName}`)
-    })
-  }
-  // Continue to JSON Server router for other endpoints
-  next()
-})
+// let uploadFileName = ''
+// server.use((req, res, next) => {
+//   const url = req.originalUrl
+//   if (url.startsWith('/poems') && req.method === 'POST') {
+//     const form = new multiparty.Form()
+//     form.parse(req, function (err, fields, files) {
+//       console.log(`Files: ${JSON.stringify(files)}`)
+//       uploadFileName = files.file[0].originalFilename
+//       console.log(`File Name: ${uploadFileName}`)
+//     })
+//   }
+//   // Continue to JSON Server router for other endpoints
+//   next()
+// })
 
 // Mock1 Acronyms
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -70,32 +94,14 @@ router.render = (req, res) => {
   const url = req.originalUrl
   console.log(`URL: ${url}`)
   console.log(`Method: ${req.method}`)
-  console.log(`uploadFile: ${uploadFileName}`)
   if (url.startsWith('/acronyms') && req.method === 'GET' && acroKey) {
-    const result: Acronym[] = mockdata.acronyms // res.locals.data
+    const result: Acronym[] = res.locals.data
     console.log(result)
     const returnData: Acronym | undefined = result.find((obj) => {
       return obj.acronym === acroKey
     })
 
     res.jsonp(returnData)
-  } else if (
-    url.startsWith('/poems') &&
-    req.method === 'POST' &&
-    uploadFileName
-  ) {
-    console.log('Pre switch')
-    // Mock2 Poems POST
-    switch (uploadFileName) {
-      case 'poemfile1.txt':
-        console.log('File Hit')
-        res.jsonp({ uuid: '1' })
-        break
-      default:
-        console.log('Default - No File Hit')
-        res.jsonp({ uuid: '2' })
-        break
-    }
   } else {
     res.jsonp(res.locals.data)
   }
