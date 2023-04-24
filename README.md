@@ -1,6 +1,6 @@
 # mock-json-server
 
-Example Mock Server based on json-server package
+Example Mock Server based on json-server package, using Typescript
 
 ## Mocking Scope
 
@@ -13,7 +13,3 @@ We will mock:
   - Subsequent GET with Poem UUID/ID to get Poem Text.
 - Quotes:
   - Standard JSON-Server CRUD on quotes, GET, POST for example
-
-## Target Deployment is K8s
-
-Dockerfile with local Docker to test
