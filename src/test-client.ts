@@ -2,6 +2,9 @@ import axios from 'axios'
 import fs from 'fs'
 import FormData from 'form-data'
 
+/*
+Various Axios calls to Json-server based server as examples.
+*/
 async function postPoem(title: string, author: string, file: string) {
   const bodyFormData = new FormData()
   bodyFormData.append('title', title)
@@ -29,19 +32,25 @@ async function getPoemByID(id: string) {
   return response
 }
 
+/* 
+Mimic async behaviour:
+1. Post a request, get a UUID - > Service then processes the POST request (file)
+2. We then GET on UUID to get result of aysnc process (Simplified here - axios interceptor/retry in real system)
+*/
+
+// POST
 const resp = postPoem('Poem1', 'Poet1', './testfiles/poemfile1.txt')
-
-let poemID = ''
-
 resp.then((response) => {
-  console.log(`Response.then => : ${JSON.stringify(response.data)}`)
-  poemID = response.data.uuid
+  console.log(`Response => : ${JSON.stringify(response.data)}`)
+  const poemID = response.data.uuid
+  // GET
   const poemText = getPoemByID(poemID)
   poemText.then((response) => {
-    console.log(`Poem Response.then => : ${JSON.stringify(response.data.Text)}`)
+    console.log(`Poem Text => : ${JSON.stringify(response.data.Text)}`)
   })
 })
 
+// GET a single acronym meaning, using url query acronym + another key-value
 axios({
   method: 'get',
   url: 'http://localhost:3004/acronyms',
@@ -56,6 +65,7 @@ axios({
     console.log(response)
   })
 
+// GET all quoutes
 axios({
   method: 'get',
   url: 'http://localhost:3004/quotes',
@@ -69,6 +79,7 @@ axios({
     console.log(response)
   })
 
+// POST (add) a new quote - in memory only
 axios({
   method: 'post',
   url: 'http://localhost:3004/quotes',
