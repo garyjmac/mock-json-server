@@ -45,7 +45,7 @@ resp.then((response) => {
 axios({
   method: 'get',
   url: 'http://localhost:3004/acronyms',
-  params: { acro: 'YOLO' },
+  params: { acronym: 'YOLO', system: 'Alpha' },
 })
   .then(function (response) {
     //handle success
