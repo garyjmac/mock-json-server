@@ -41,22 +41,6 @@ server.post('/poems', (req, res) => {
   })
 })
 
-// Mock1 Acronyms - Get the '/acyonyms?acro=????' acro query param for use in filtering of acronyms
-let acroKey = ''
-server.use((req, res, next) => {
-  const url = req.originalUrl
-  if (url.startsWith('/acronyms') && req.method === 'GET') {
-    if (req.query['acro']) {
-      acroKey = req.query['acro'] as string
-      console.log(`Query Param: ${acroKey}`)
-    } else {
-      console.log(`Expected a Query param on /acronyms - none found`)
-    }
-  }
-  // Continue to JSON Server router for other endpoints
-  next()
-})
-
 // To handle POST, PUT and PATCH you need to use a body-parser
 // You can use the one used by JSON Server
 server.use(jsonServer.bodyParser)
@@ -71,37 +55,22 @@ server.use(jsonServer.bodyParser)
 // Use default router to get mockdata
 server.use(router)
 
-// Mock2 Poems - Find file name in POSTed FormData
-// let uploadFileName = ''
-// server.use((req, res, next) => {
-//   const url = req.originalUrl
-//   if (url.startsWith('/poems') && req.method === 'POST') {
-//     const form = new multiparty.Form()
-//     form.parse(req, function (err, fields, files) {
-//       console.log(`Files: ${JSON.stringify(files)}`)
-//       uploadFileName = files.file[0].originalFilename
-//       console.log(`File Name: ${uploadFileName}`)
-//     })
-//   }
-//   // Continue to JSON Server router for other endpoints
-//   next()
-// })
-
 // Mock1 Acronyms
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 router.render = (req, res) => {
   const url = req.originalUrl
+  console.log(`Req: ${JSON.stringify(req.query)}`)
   console.log(`URL: ${url}`)
   console.log(`Method: ${req.method}`)
-  if (url.startsWith('/acronyms') && req.method === 'GET' && acroKey) {
+  if (url.startsWith('/acronyms') && req.method === 'GET') {
     const result: Acronym[] = res.locals.data
     console.log(result)
-    const returnData: Acronym | undefined = result.find((obj) => {
-      return obj.acronym === acroKey
-    })
-
-    res.jsonp(returnData)
+    if (result.length === 1) {
+      res.send(result[0].meaning)
+    } else {
+      res.status(404).send('Error')
+    }
   } else {
     res.jsonp(res.locals.data)
   }
